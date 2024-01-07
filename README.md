@@ -9,3 +9,5 @@ Controls:
 - space: pause/unpause the simulation
 - lmb: set a given cell to alive
 - rmb: set a given cell to dead
+- mwheelup: increase delay by 10ms (max 1000ms)
+- mwheeldown: decrease delay by 10ms (min 20ms)
