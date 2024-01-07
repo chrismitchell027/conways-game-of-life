@@ -2,6 +2,5 @@
     "SCREEN_SIZE": [1280, 1280],  
     "ROWS": 64,                 
     "COLS": 64,                 
-    "DELAY_MS": 10,             
     "HIGHLIGHT_SLEEP_MS": 5000  
 }

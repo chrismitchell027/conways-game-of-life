@@ -13,7 +13,6 @@ except FileNotFoundError:
 SCREEN_SIZE = settings_dict["SCREEN_SIZE"]
 ROWS = settings_dict["ROWS"]
 COLS = settings_dict["COLS"]
-DELAY_MS = settings_dict["DELAY_MS"]
 HIGHLIGHT_SLEEP_MS = settings_dict["HIGHLIGHT_SLEEP_MS"]
 # dependent constants
 CELL_SIZE = SCREEN_SIZE[0] / COLS, SCREEN_SIZE[1] / ROWS
@@ -145,6 +144,7 @@ def main():
     last_update_time = pygame.time.get_ticks()
     last_highlight_time = pygame.time.get_ticks()
     last_mouse_pos = pygame.mouse.get_pos()
+    delay_ms = 200
     # create the baord
     board = initialize_board(ROWS, COLS)
 
@@ -154,6 +154,8 @@ def main():
     # create highlight rect
     highlighted_rect = pygame.Rect(-CELL_SIZE[0], -CELL_SIZE[1], CELL_SIZE[0], CELL_SIZE[1])
     
+    # create the font
+    font = pygame.font.Font(None, 36)
     # main loop
     running = True
     while running:
@@ -168,7 +170,12 @@ def main():
                 # r key -> clear the board
                 elif event.key == pygame.K_r:
                     board = clear_board()
-
+            # check for scrolling
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 4:   #scroll up
+                    delay_ms = min(delay_ms + 10, 1000)
+                elif event.button == 5: #scroll down
+                    delay_ms = max(delay_ms - 10, 20)
         # get mouse position info
         x, y = pygame.mouse.get_pos()
         row = y // CELL_SIZE[1]
@@ -197,14 +204,23 @@ def main():
             highlighted_rect.topleft = (-CELL_SIZE[0], -CELL_SIZE[1])
 
         # update the board
-        if pygame.time.get_ticks() - last_update_time >= DELAY_MS and game_on:
+        if pygame.time.get_ticks() - last_update_time >= delay_ms and game_on:
             board = update_board(board)
             last_update_time = pygame.time.get_ticks()
 
         # update screen
         draw_board(screen, board)
-        pygame.draw.rect(screen, (255, 0, 0), highlighted_rect, 2)
+        highlight_color = (0, 255, 0) if game_on else (255, 0, 0)
+        pygame.draw.rect(screen, highlight_color, highlighted_rect, 2)
 
+        # Draw text on the screen
+        text = font.render(f"Delay: {delay_ms} ms", True, highlight_color)
+        text_x, text_y = ((SCREEN_SIZE[0] // 2) - (text.get_rect().width // 2), 50)
+        text_bg_rect = text.get_rect()
+        transparent_surface = pygame.Surface((text_bg_rect.width, text_bg_rect.height), pygame.SRCALPHA)
+        transparent_surface.fill((0, 0, 0, 128))
+        screen.blit(transparent_surface, (text_x, text_y))
+        screen.blit(text, (text_x, text_y))
 
         pygame.display.flip()
         clock.tick(60)
